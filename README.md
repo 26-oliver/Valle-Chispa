@@ -44,4 +44,4 @@ Then open [the local game](http://localhost:8000/).
 
 ## Support the game
 
-If you enjoy spending time in the valley, you can support its development on [Ko-Fi](https://ko-fi.com/V4I12AQ4QE).
+If you enjoy spending time in the valley, you can support its development on [Ko-Fi](https://dub.sh/URyAvr0).
