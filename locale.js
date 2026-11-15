@@ -3,7 +3,7 @@
 const ValleLocale = (() => {
   const languages = ["es", "en", "fr", "pt"];
   const preference = "valle-chispa:language";
-  let language = "es";
+  let language = "en";
   try {
     const saved = localStorage.getItem(preference);
     if (languages.includes(saved)) language = saved;
@@ -28,6 +28,8 @@ const ValleLocale = (() => {
 
   function translateDocument() {
     document.documentElement.lang = language;
+    const description = document.querySelector("meta[name=description]");
+    description.content = t("Despierta el cristal del Claro Esmeralda en Valle Chispa.");
     if (language === "es") return;
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
@@ -39,8 +41,6 @@ const ValleLocale = (() => {
         if (value) element.setAttribute(attribute, t(value));
       }
     }
-    const description = document.querySelector("meta[name=description]");
-    description.content = t(description.content);
   }
 
   function setLanguage(value) {
