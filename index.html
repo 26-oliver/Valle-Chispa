@@ -84,6 +84,8 @@
     .menu-choice.is-selected { color: var(--cream); transform: translateX(4px); }
     .menu-choice.is-selected::before { opacity: 1; transform: scaleY(1); }
     .menu-choice:enabled:active { transform: translateX(8px); }
+    .title-support { display: block; width: min(246px, 100%); height: 68px; margin-top: 16px; border: 0; }
+    .title-support:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     .title-foot { display: grid; gap: 20px; margin-top: auto; padding-top: clamp(32px, 5.4vh, 64px); color: var(--cream-muted); }
     .menu-description { max-width: 30ch; min-height: 3em; font-size: 14px; line-height: 1.5; }
     .key-guide { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; color: var(--cream-muted); font-size: 12px; }
@@ -180,7 +182,8 @@
       .cover-screen .scrim { background: linear-gradient(0deg, var(--black-pine), var(--shade) 32%, var(--clear) 77%), linear-gradient(90deg, var(--soft-shade), var(--clear) 80%); }
       .title-content { min-height: min(71dvh, 620px); }
       .wordmark { margin-top: 0; margin-bottom: auto; padding-bottom: 24px; }
-      .title-foot { margin-top: 0; padding-top: 28px; }
+      .title-support { margin-top: 12px; }
+      .title-foot { margin-top: 0; padding-top: 16px; }
       .game-hud { inset-inline: var(--right); }
       .game-screen { --right: max(12px, calc(env(safe-area-inset-right) + 8px)); }
       .game-hud { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
@@ -236,6 +239,31 @@
             <li id="restart-option" hidden><button type="button" class="menu-choice restart-choice" id="restart" aria-haspopup="dialog">Empezar de nuevo</button></li>
           </ul>
         </nav>
+        <iframe class="title-support" title="Buy me a coffee de Oliver"
+          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" loading="lazy"
+          srcdoc="
+            <!doctype html>
+            <html lang='en'>
+            <head>
+              <meta charset='utf-8'>
+              <meta name='referrer' content='no-referrer'>
+              <style>
+                :root { --coffee: #FFDD00; --coffee-ink: #000000; }
+                body { margin: 4px; }
+                .coffee-fallback { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 60px; min-width: 210px; padding: 0 18px; border-radius: 12px; background: var(--coffee); color: var(--coffee-ink); font: 700 20px system-ui, sans-serif; text-decoration: none; }
+                body:has(.bmc-btn) .coffee-fallback { display: none; }
+                .coffee-fallback:focus-visible, .bmc-btn:focus-visible { outline: 2px solid var(--coffee); outline-offset: 2px; }
+              </style>
+            </head>
+            <body>
+              <a class='coffee-fallback' href='https://buymeacoffee.com/oliver26' target='_blank' rel='noopener noreferrer'>Buy me a coffee</a>
+              <script src='https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js'
+                data-name='bmc-button' data-slug='oliver26' data-color='#FFDD00' data-emoji=''
+                data-font='Comic' data-text='Buy me a coffee' data-outline-color='#000000'
+                data-font-color='#000000' data-coffee-color='#ffffff'></script>
+            </body>
+            </html>
+          "></iframe>
         <div class="title-foot">
           <p class="menu-description" id="menu-description">Despierta el cristal del Claro Esmeralda.</p>
           <p class="key-guide" aria-hidden="true">
