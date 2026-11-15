@@ -50,7 +50,7 @@
     h1, h2 { text-wrap: balance; }
     button { font: inherit; cursor: pointer; }
     button:disabled { cursor: default; opacity: .55; }
-    button:focus-visible, a.menu-choice:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+    button:focus-visible, .donation-method:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
     [hidden] { display: none !important; }
     img { display: block; }
     .pixel { image-rendering: pixelated; }
@@ -84,7 +84,7 @@
     .menu-choice.is-selected { color: var(--cream); transform: translateX(4px); }
     .menu-choice.is-selected::before { opacity: 1; transform: scaleY(1); }
     .menu-choice:not(:disabled):active { transform: translateX(8px); }
-    a.menu-choice { width: fit-content; text-decoration: none; }
+
     .title-foot { display: grid; gap: 20px; margin-top: auto; padding-top: clamp(32px, 5.4vh, 64px); color: var(--cream-muted); }
     .menu-description { max-width: 30ch; min-height: 3em; font-size: 14px; line-height: 1.5; }
     .key-guide { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; color: var(--cream-muted); font-size: 12px; }
@@ -167,6 +167,8 @@
     @keyframes notification-in { from { transform: translate3d(25px, -6px, 0); opacity: 0; } }
 
     .help { max-width: min(430px, calc(100% - 32px)); margin: auto; padding: 24px; border: 1px solid var(--glass-edge); border-radius: 12px; background: var(--ink); color: var(--cream); }
+    .donation-method { margin-bottom: 16px; border-color: var(--mint); background: var(--mint); color: var(--ink); text-decoration: none; }
+    .donation-method:hover { background: var(--mint-hover); }
     .help[open] { animation: notification-in 220ms var(--ease-out) both; }
     .help::backdrop { background: var(--shade); }
     .help h2 { margin-bottom: 12px; font-family: var(--font-display); font-size: 29px; }
@@ -235,7 +237,7 @@
             <li><button type="button" class="menu-choice" id="open-help" disabled>Cómo jugar</button></li>
             <li><button type="button" class="menu-choice" id="menu-fullscreen" disabled>Pantalla completa</button></li>
             <li id="restart-option" hidden><button type="button" class="menu-choice restart-choice" id="restart" aria-haspopup="dialog">Empezar de nuevo</button></li>
-            <li><a class="menu-choice" href="https://buymeacoffee.com/oliver26" target="_blank" rel="noopener noreferrer">buy me a coffe</a></li>
+            <li><button type="button" class="menu-choice" id="open-donations" aria-haspopup="dialog" disabled>Donaciones</button></li>
           </ul>
         </nav>
         <div class="title-foot">
@@ -320,6 +322,11 @@
       <p>Pulsa el cristal, el botón «Púlsame» o la barra espaciadora para ganar chispas. Canjéalas en la tienda por compañeros, mejoras, gemas y efectos. Recoge 25 en total para completar Primer destello. Tu partida se guarda en este navegador.</p>
       <p>Las chispas acumuladas desbloquean mapas. En Actividades encontrarás minijuegos, encargos y evoluciones. Los compañeros y las mejoras pueden producir durante hasta dos horas con el juego cerrado.</p>
       <form method="dialog"><button type="submit" class="hud-button" autofocus>Volver</button></form>
+    </dialog>
+    <dialog class="help" id="donations" aria-labelledby="donations-heading">
+      <h2 id="donations-heading">Métodos de donación</h2>
+      <a class="hud-button donation-method" href="https://dub.sh/URyAvr0" target="_blank" rel="noopener noreferrer">Ko-Fi (recomendado)</a>
+      <form method="dialog"><button type="submit" class="hud-button">Volver</button></form>
     </dialog>
     <dialog class="market" id="market" aria-labelledby="market-heading">
       <div class="market-header">
@@ -407,6 +414,8 @@
     const start = document.querySelector("#start");
     const restart = document.querySelector("#restart");
     const restartOption = document.querySelector("#restart-option");
+    const donations = document.querySelector("#donations");
+    const donationsTrigger = document.querySelector("#open-donations");
     const resetDialog = document.querySelector("#reset-dialog");
     const confirmReset = document.querySelector("#confirm-reset");
     const resetStatus = document.querySelector("#reset-status");
@@ -504,7 +513,7 @@
     });
 
     function overlayOpen() {
-      return shop.dialog.open || atlas.dialog.open || activities.dialog.open || resetDialog.open;
+      return shop.dialog.open || atlas.dialog.open || activities.dialog.open || resetDialog.open || donations.open;
     }
 
     function closeOverlay() {
@@ -673,7 +682,7 @@
         "Aprende a recoger chispas y completar el primer objetivo.",
         document.fullscreenElement ? "Vuelve a la ventana del navegador." : "Expande el valle a toda la pantalla.",
         "Reinicia el valle desde el comienzo.",
-        "Apoya a Valle Chispa en Buy Me a Coffee."
+        "Apoya el desarrollo de Valle Chispa."
       ];
       menuDescription.textContent = descriptions[index];
       if (focus) menuChoices[index].focus({ preventScroll: true });
@@ -862,6 +871,7 @@
       selectChoice(0);
       start.disabled = false;
       openHelp.disabled = false;
+      donationsTrigger.disabled = false;
     });
     window.setInterval(() => {
       if (economy.rate(state) > 0) updateState();
@@ -886,6 +896,8 @@
     start.addEventListener("click", () => setPlaying(true));
     back.addEventListener("click", () => setPlaying(false));
     openHelp.addEventListener("click", () => help.showModal());
+    donationsTrigger.addEventListener("click", () => donations.showModal());
+    donations.addEventListener("close", () => donationsTrigger.focus({ preventScroll: true }));
     restart.addEventListener("click", () => {
       resetStatus.textContent = "";
       resetDialog.showModal();
