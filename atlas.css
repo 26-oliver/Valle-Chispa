@@ -1,0 +1,104 @@
+:root {
+  --winter-glass: #172744eb;
+  --winter-edge: #e3f2ff70;
+  --winter-mote: #c5eaff;
+  --cavern-glass: #2e211cf2;
+  --cavern-edge: #ffe09865;
+  --cavern-mote: #ffbf67;
+  --polar-light: #a0ffe492;
+  --magma-light: #ffa05d99;
+  --ember-particle: #ff9355;
+  --ember-light: #ffe099;
+}
+
+.game-screen[data-area="summit"] { --glass: var(--winter-glass); --glass-edge: var(--winter-edge); }
+.game-screen[data-area="cave"] { --glass: var(--cavern-glass); --glass-edge: var(--cavern-edge); }
+.game-screen[data-area="summit"] .mote { background: var(--winter-mote); box-shadow: 0 0 10px var(--winter-mote); }
+.game-screen[data-area="cave"] .mote { background: var(--cavern-mote); box-shadow: 0 0 10px var(--cavern-mote); }
+.game-screen[data-gem="aurora"] { --glow: var(--polar-light); }
+.game-screen[data-gem="magma"] { --glow: var(--magma-light); }
+
+.location::before { display: none; }
+.location .map-trigger { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; text-shadow: none; }
+.map-trigger .icon-map {
+  width: 11px;
+  height: 11px;
+  transform: rotate(45deg);
+  border: 1px solid var(--gold);
+  background: var(--clear);
+  box-shadow: inset 0 0 0 2px var(--glass);
+}
+.map-trigger .map-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+.map-trigger .map-action { border-left: 1px solid var(--glass-edge); padding-left: 8px; color: var(--mint); font-size: 11px; }
+
+.atlas { height: min(422px, calc(100dvh - 48px)); }
+.atlas-header { grid-template-columns: minmax(0, 1fr) auto; }
+.atlas-intro { margin-top: 4px; color: var(--cream-muted); font-size: 13px; line-height: 1.45; }
+.atlas-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px 24px; }
+.atlas-route { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.atlas-stop { min-width: 0; border: 1px solid var(--market-line); border-radius: 9px; background: var(--market-card); overflow: clip; }
+.atlas-stop[data-access="current"] { border-color: var(--fern); }
+.atlas-stop[data-access="locked"] .atlas-art { filter: saturate(.6) brightness(.68); }
+.atlas-art { width: 100%; aspect-ratio: 2 / 1; object-fit: cover; border-bottom: 1px solid var(--market-line); }
+.atlas-caption { padding: 12px; }
+.atlas-level { color: var(--mint); font-size: 11px; font-weight: 750; }
+.atlas-caption h3 { margin: 4px 0; font-family: var(--font-display); font-size: 19px; font-weight: 700; line-height: 1.15; overflow-wrap: break-word; }
+.atlas-requirement { color: var(--cream-muted); font-size: 12px; }
+.atlas-visit { width: 100%; min-height: 40px; margin-top: 12px; padding: 4px 8px; border: 1px solid var(--fern); border-radius: 6px; background: var(--mint); color: var(--ink); font-size: 13px; font-weight: 800; }
+.atlas-visit:enabled:hover { background: var(--mint-hover); }
+.atlas-visit:disabled { border-color: var(--market-line); background: var(--market-wall); color: var(--cream-muted); opacity: 1; }
+.atlas-stop[data-access="current"] .atlas-visit { color: var(--mint); }
+
+.market[data-area="summit"] {
+  --market: #172735;
+  --market-wall: #111e2b;
+  --market-card: #213543;
+  --market-line: #435a6c;
+  --mint: #cde7fc;
+  --mint-hover: #e5f4ff;
+  --fern: #7ea0bd;
+}
+.market[data-area="cave"] {
+  --market: #2b211b;
+  --market-wall: #211913;
+  --market-card: #392a20;
+  --market-line: #654938;
+  --mint: #ffd497;
+  --mint-hover: #ffebc5;
+  --fern: #ad804d;
+}
+
+.market-art[data-art="copo"], .market-art[data-art="boreas"], .market-art[data-art="aurora"], .market-art[data-art="ice-pick"], .market-art[data-art="snow"] { background: var(--market-art-blue); }
+.market-art[data-art="geodo"], .market-art[data-art="candela"], .market-art[data-art="magma"], .market-art[data-art="forge"], .market-art[data-art="embers"] { background: var(--market-art-warm); }
+.market-art[data-art="ice-pick"] img { filter: hue-rotate(162deg); }
+.market-art[data-art="forge"] img { filter: saturate(1.7); }
+.burst-origin[data-effect="snow"] { --effect-ink: var(--winter-mote); }
+.burst-origin[data-effect="embers"] { --effect-ink: var(--ember-particle); }
+[data-effect="snow"] .particle, [data-effect="snow"] .effect-mark, [data-art="snow"] .effect-preview {
+  background: var(--winter-mote);
+  clip-path: polygon(17% 17%, 43% 40%, 43% 0, 57% 0, 57% 40%, 83% 17%, 93% 27%, 64% 50%, 93% 73%, 83% 83%, 57% 60%, 57% 100%, 43% 100%, 43% 60%, 17% 83%, 7% 73%, 36% 50%, 7% 27%);
+}
+[data-effect="snow"] .particle:nth-child(even) { background: var(--cream); }
+[data-effect="embers"] .particle, [data-effect="embers"] .effect-mark, [data-art="embers"] .effect-preview {
+  background: var(--ember-particle);
+  clip-path: polygon(55% 0, 69% 33%, 88% 45%, 100% 62%, 84% 88%, 60% 100%, 28% 94%, 9% 77%, 20% 50%, 36% 62%, 40% 33%);
+}
+[data-effect="embers"] .particle:nth-child(even) { background: var(--ember-light); }
+
+@media (max-width: 620px) {
+  .game-screen .location { bottom: max(12px, env(safe-area-inset-bottom)); }
+  .game-screen .collect-area { bottom: max(64px, calc(var(--bottom) + 24px)); }
+  .atlas { height: min(456px, calc(100dvh - 24px)); }
+  .atlas-header { padding: 12px; }
+  .atlas-body { padding: 12px; }
+  .atlas-route { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .atlas-stop { display: grid; grid-template-columns: minmax(72px, 29%) minmax(0, 1fr); }
+  .atlas-art { height: 100%; aspect-ratio: auto; border-bottom: 0; border-right: 1px solid var(--market-line); }
+  .atlas-caption { padding: 8px 12px; }
+  .atlas-caption h3 { font-size: 17px; }
+  .atlas-visit { min-height: 36px; margin-top: 8px; }
+}
+@media (max-width: 620px) and (max-height: 500px) {
+  .game-screen .location { inset: auto auto 8px 8px; }
+  .game-screen .collect-area { bottom: 54px; }
+}
