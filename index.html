@@ -169,6 +169,9 @@
     .help { max-width: min(430px, calc(100% - 32px)); margin: auto; padding: 24px; border: 1px solid var(--glass-edge); border-radius: 12px; background: var(--ink); color: var(--cream); }
     .donation-method { margin-bottom: 16px; border-color: var(--mint); background: var(--mint); color: var(--ink); text-decoration: none; }
     .donation-method:hover { background: var(--mint-hover); }
+    .language-field { display: grid; gap: 8px; margin-bottom: 16px; color: var(--cream-muted); }
+    .language-field select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--glass-edge); border-radius: 6px; background: var(--glass); color: var(--cream); font: inherit; }
+    .language-field select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     .help[open] { animation: notification-in 220ms var(--ease-out) both; }
     .help::backdrop { background: var(--shade); }
     .help h2 { margin-bottom: 12px; font-family: var(--font-display); font-size: 29px; }
@@ -238,6 +241,7 @@
             <li><button type="button" class="menu-choice" id="menu-fullscreen" disabled>Pantalla completa</button></li>
             <li id="restart-option" hidden><button type="button" class="menu-choice restart-choice" id="restart" aria-haspopup="dialog">Empezar de nuevo</button></li>
             <li><button type="button" class="menu-choice" id="open-donations" aria-haspopup="dialog" disabled>Donaciones</button></li>
+            <li><button type="button" class="menu-choice" id="open-language" aria-haspopup="dialog" disabled>Idioma</button></li>
           </ul>
         </nav>
         <div class="title-foot">
@@ -323,6 +327,23 @@
       <p>Las chispas acumuladas desbloquean mapas. En Actividades encontrarás minijuegos, encargos y evoluciones. Los compañeros y las mejoras pueden producir durante hasta dos horas con el juego cerrado.</p>
       <form method="dialog"><button type="submit" class="hud-button" autofocus>Volver</button></form>
     </dialog>
+    <dialog class="help" id="language" aria-labelledby="language-heading">
+      <h2 id="language-heading">Idioma</h2>
+      <form id="language-form">
+        <label class="language-field" for="language-choice">Elige el idioma del juego
+          <select id="language-choice" autofocus>
+            <option value="es" lang="es" data-language-name>Español</option>
+            <option value="en" lang="en" data-language-name>English</option>
+            <option value="fr" lang="fr" data-language-name>Français</option>
+            <option value="pt" lang="pt" data-language-name>Português</option>
+          </select>
+        </label>
+        <div class="reset-actions">
+          <button type="submit" class="hud-button">Aplicar</button>
+          <button type="button" class="hud-button" id="close-language">Volver</button>
+        </div>
+      </form>
+    </dialog>
     <dialog class="help" id="donations" aria-labelledby="donations-heading">
       <h2 id="donations-heading">Métodos de donación</h2>
       <a class="hud-button donation-method" href="https://dub.sh/URyAvr0" target="_blank" rel="noopener noreferrer">Ko-Fi (recomendado)</a>
@@ -396,24 +417,30 @@
       <p class="reset-status" id="reset-status" role="status"></p>
     </dialog>
   </main>
-  <script src="./economy.js?v=6"></script>
-  <script src="./activities.js?v=6"></script>
-  <script src="./atlas.js"></script>
-  <script src="./shop.js"></script>
+  <script src="./locale.js?v=1"></script>
+  <script src="./economy.js?v=7"></script>
+  <script src="./activities.js?v=7"></script>
+  <script src="./atlas.js?v=7"></script>
+  <script src="./shop.js?v=7"></script>
   <script>
     "use strict";
+
+    ValleLocale.translateDocument();
 
     const legacyKey = "valle-chispa:balance:v1";
     const storageKey = "valle-chispa:partida:v2";
     const economy = ValleEconomy;
     const goal = 25;
-    const format = new Intl.NumberFormat("es-ES");
+    const format = new Intl.NumberFormat(ValleLocale.locale);
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
     const titleScreen = document.querySelector("#title-screen");
     const gameScreen = document.querySelector("#game-screen");
     const start = document.querySelector("#start");
     const restart = document.querySelector("#restart");
     const restartOption = document.querySelector("#restart-option");
+    const languageDialog = document.querySelector("#language");
+    const languageTrigger = document.querySelector("#open-language");
+    const languageChoice = document.querySelector("#language-choice");
     const donations = document.querySelector("#donations");
     const donationsTrigger = document.querySelector("#open-donations");
     const resetDialog = document.querySelector("#reset-dialog");
@@ -469,7 +496,7 @@
       if (pet.roam) button.dataset.roam = pet.roam;
       button.dataset.area = pet.area;
       button.setAttribute("aria-label", pet.name + ", " + pet.note);
-      button.title = pet.name + " (+" + pet.rate + " por segundo)";
+      button.title = pet.name + " (+" + pet.rate + t(" por segundo)");
       button.hidden = true;
       sprite.className = "pixel";
       sprite.src = pet.art;
@@ -479,8 +506,8 @@
       button.append(facing);
       button.addEventListener("click", () => {
         const rate = economy.petRate(state, pet);
-        const unit = rate === 1 ? " chispa por segundo." : " chispas por segundo.";
-        showNotification(pet.name, "Recoge " + rate + unit, button);
+        const unit = rate === 1 ? t(" chispa por segundo.") : t(" chispas por segundo.");
+        showNotification(pet.name, t("Recoge ") + rate + unit, button);
       });
       companionLayer.append(button);
       return button;
@@ -513,7 +540,7 @@
     });
 
     function overlayOpen() {
-      return shop.dialog.open || atlas.dialog.open || activities.dialog.open || resetDialog.open || donations.open;
+      return shop.dialog.open || atlas.dialog.open || activities.dialog.open || resetDialog.open || donations.open || languageDialog.open;
     }
 
     function closeOverlay() {
@@ -617,7 +644,7 @@
           return true;
         });
         if (cleared) resetDialog.close();
-        else resetStatus.textContent = "El navegador ha impedido borrar el guardado. Tu partida sigue activa.";
+        else resetStatus.textContent = t("El navegador ha impedido borrar el guardado. Tu partida sigue activa.");
       } finally {
         confirmReset.disabled = false;
       }
@@ -630,9 +657,9 @@
       if (balance.textContent !== amount) balance.textContent = amount;
       walletRate.hidden = rate === 0;
       walletRate.textContent = "+" + format.format(rate) + " / s";
-      powerHint.textContent = "+" + value + " por pulso";
-      collectionValue.textContent = value === 1 ? "Una chispa por pulsación." : value + " chispas por pulsación.";
-      start.textContent = state.earned > 0 ? "Continuar partida" : "Jugar";
+      powerHint.textContent = "+" + value + t(" por pulso");
+      collectionValue.textContent = value === 1 ? t("Una chispa por pulsación.") : value + t(" chispas por pulsación.");
+      start.textContent = state.earned > 0 ? t("Continuar partida") : t("Jugar");
       restartOption.hidden = state.earned === 0;
       collect.disabled = state.balance >= economy.limit;
       gemButton.disabled = collect.disabled;
@@ -645,7 +672,7 @@
         const evolved = state.evolved.includes(pet.id);
         button.hidden = pet.area !== state.area || !state.owned.includes(pet.id);
         button.toggleAttribute("data-evolved", evolved);
-        button.title = pet.name + " (+" + economy.petRate(state, pet) + " por segundo)";
+        button.title = pet.name + " (+" + economy.petRate(state, pet) + t(" por segundo)");
       }
       companionLayer.hidden = companionButtons.every((button) => button.hidden);
       renderArea();
@@ -678,11 +705,12 @@
         choice.classList.toggle("is-selected", choiceIndex === index);
       });
       const descriptions = [
-        state.earned > 0 ? "Continúa en " + economy.areaIndex.get(state.pendingArea || state.area).name + "." : "Despierta el cristal del Claro Esmeralda.",
-        "Aprende a recoger chispas y completar el primer objetivo.",
-        document.fullscreenElement ? "Vuelve a la ventana del navegador." : "Expande el valle a toda la pantalla.",
-        "Reinicia el valle desde el comienzo.",
-        "Apoya el desarrollo de Valle Chispa."
+        state.earned > 0 ? t("Continúa en ") + economy.areaIndex.get(state.pendingArea || state.area).name + "." : t("Despierta el cristal del Claro Esmeralda."),
+        t("Aprende a recoger chispas y completar el primer objetivo."),
+        document.fullscreenElement ? t("Vuelve a la ventana del navegador.") : t("Expande el valle a toda la pantalla."),
+        t("Reinicia el valle desde el comienzo."),
+        t("Apoya el desarrollo de Valle Chispa."),
+        t("Elige el idioma del juego")
       ];
       menuDescription.textContent = descriptions[index];
       if (focus) menuChoices[index].focus({ preventScroll: true });
@@ -714,8 +742,8 @@
     function showProgress() {
       const complete = state.earned >= goal;
       const count = format.format(Math.min(state.earned, goal));
-      const message = complete ? "Objetivo completado. Has recogido tus primeras 25 chispas." : count + " de 25 chispas recogidas.";
-      showNotification("Primer destello", message, progressButton);
+      const message = complete ? t("Objetivo completado. Has recogido tus primeras 25 chispas.") : count + t(" de 25 chispas recogidas.");
+      showNotification(t("Primer destello"), message, progressButton);
     }
 
     function showPendingProgress() {
@@ -724,7 +752,7 @@
         const { area, automatic } = pendingArrival;
         pendingArrival = null;
         pendingProgress = false;
-        showNotification(automatic ? "Nuevo mapa desbloqueado" : "Has viajado", area.name, openMap);
+        showNotification(automatic ? t("Nuevo mapa desbloqueado") : t("Has viajado"), area.name, openMap);
       } else if (pendingProgress) {
         pendingProgress = false;
         showProgress();
@@ -732,7 +760,7 @@
     }
 
     function showSaveWarning() {
-      showNotification("Guardado desactivado", "El progreso se conservará mientras esta página siga abierta.", progressButton);
+      showNotification(t("Guardado desactivado"), t("El progreso se conservará mientras esta página siga abierta."), progressButton);
     }
 
     function setPlaying(playing) {
@@ -751,7 +779,7 @@
 
     function syncFullscreen() {
       const fullscreen = Boolean(document.fullscreenElement);
-      const label = fullscreen ? "Salir de pantalla completa" : "Pantalla completa";
+      const label = fullscreen ? t("Salir de pantalla completa") : t("Pantalla completa");
       menuFullscreen.textContent = label;
       gameFullscreen.setAttribute("aria-label", label);
       gameFullscreen.setAttribute("aria-pressed", String(fullscreen));
@@ -768,7 +796,7 @@
           await document.documentElement.requestFullscreen();
         }
       } catch {
-        showNotification("Pantalla completa", "El navegador ha mantenido el juego en su ventana.", trigger);
+        showNotification(t("Pantalla completa"), t("El navegador ha mantenido el juego en su ventana."), trigger);
       }
     }
 
@@ -850,7 +878,7 @@
       spawnEffect(effects, state.effect, origin, result.amount, milestone);
       window.clearTimeout(announcementTimer);
       announcementTimer = window.setTimeout(() => {
-        announcement.textContent = format.format(state.balance) + (state.balance === 1 ? " chispa disponible." : " chispas disponibles.");
+        announcement.textContent = format.format(state.balance) + (state.balance === 1 ? t(" chispa disponible.") : t(" chispas disponibles."));
       }, 250);
     }
 
@@ -872,6 +900,7 @@
       start.disabled = false;
       openHelp.disabled = false;
       donationsTrigger.disabled = false;
+      languageTrigger.disabled = false;
     });
     window.setInterval(() => {
       if (economy.rate(state) > 0) updateState();
@@ -896,6 +925,17 @@
     start.addEventListener("click", () => setPlaying(true));
     back.addEventListener("click", () => setPlaying(false));
     openHelp.addEventListener("click", () => help.showModal());
+    languageTrigger.addEventListener("click", () => {
+      languageChoice.value = ValleLocale.language;
+      languageDialog.showModal();
+    });
+    document.querySelector("#language-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (languageChoice.value === ValleLocale.language) languageDialog.close();
+      else ValleLocale.setLanguage(languageChoice.value);
+    });
+    document.querySelector("#close-language").addEventListener("click", () => languageDialog.close());
+    languageDialog.addEventListener("close", () => languageTrigger.focus({ preventScroll: true }));
     donationsTrigger.addEventListener("click", () => donations.showModal());
     donations.addEventListener("close", () => donationsTrigger.focus({ preventScroll: true }));
     restart.addEventListener("click", () => {

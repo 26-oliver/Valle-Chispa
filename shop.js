@@ -9,7 +9,7 @@ function createValleShop({ onBuy, onOpen, onClose, onPreview }) {
   const list = dialog.querySelector(".market-items");
   const wallet = dialog.querySelector(".market-balance strong");
   const status = dialog.querySelector(".market-status");
-  const format = new Intl.NumberFormat("es-ES");
+  const format = new Intl.NumberFormat(ValleLocale.locale);
   const { categories, areaIndex, canTrade, offer } = ValleEconomy;
   let category = categories[0];
   let cards = [];
@@ -58,9 +58,9 @@ function createValleShop({ onBuy, onOpen, onClose, onPreview }) {
     const controls = element("div", "market-controls");
     if (item.category === "effect") {
       card.classList.add("market-effect");
-      const preview = element("button", "market-test", "Probar");
+      const preview = element("button", "market-test", t("Probar"));
       preview.type = "button";
-      preview.setAttribute("aria-label", "Probar " + item.name);
+      preview.setAttribute("aria-label", t("Probar ") + item.name);
       preview.addEventListener("click", (event) => onPreview(item.id, event));
       controls.append(preview);
     }
@@ -101,13 +101,13 @@ function createValleShop({ onBuy, onOpen, onClose, onPreview }) {
       label.textContent = entry.label;
       price.hidden = entry.done || entry.cost === 0;
       value.textContent = format.format(entry.cost);
-      button.setAttribute("aria-label", entry.label + " " + item.name + (price.hidden ? "" : " por " + value.textContent + " chispas"));
+      button.setAttribute("aria-label", entry.label + " " + item.name + (price.hidden ? "" : t(" por ") + value.textContent + t(" chispas")));
       button.setAttribute("aria-disabled", String(entry.done || busy));
       button.dataset.state = entry.done ? "owned" : affordable ? "available" : "short";
       if (item.category === "companions") {
-        benefit.textContent = "+" + item.rate + (item.rate === 1 ? " chispa/s" : " chispas/s");
+        benefit.textContent = "+" + item.rate + (item.rate === 1 ? t(" chispa/s") : t(" chispas/s"));
       } else if (item.category === "upgrades") {
-        benefit.textContent = "Nivel " + entry.level + " de " + item.cap;
+        benefit.textContent = t("Nivel ") + entry.level + t(" de ") + item.cap;
       }
       benefit.hidden = !benefit.textContent;
     }
@@ -119,7 +119,7 @@ function createValleShop({ onBuy, onOpen, onClose, onPreview }) {
     if (entry.done) return;
     if (entry.cost > state.balance) {
       const missing = entry.cost - state.balance;
-      status.textContent = "Te faltan " + format.format(missing) + (missing === 1 ? " chispa." : " chispas.");
+      status.textContent = t("Te faltan ") + format.format(missing) + (missing === 1 ? t(" chispa.") : t(" chispas."));
       return;
     }
     busy = true;
@@ -129,9 +129,9 @@ function createValleShop({ onBuy, onOpen, onClose, onPreview }) {
       if (result?.changed) {
         status.textContent = result.message;
       } else if (result?.unavailable) {
-        status.textContent = "Este artículo está en otra tienda.";
+        status.textContent = t("Este artículo está en otra tienda.");
       } else if (result?.missing) {
-        status.textContent = "Te faltan " + format.format(result.missing) + (result.missing === 1 ? " chispa." : " chispas.");
+        status.textContent = t("Te faltan ") + format.format(result.missing) + (result.missing === 1 ? t(" chispa.") : t(" chispas."));
       }
     } finally {
       busy = false;

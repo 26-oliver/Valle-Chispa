@@ -2,7 +2,7 @@
 
 function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve }) {
   const economy = ValleEconomy;
-  const number = new Intl.NumberFormat("es-ES");
+  const number = new Intl.NumberFormat(ValleLocale.locale);
   const dialog = document.querySelector("#activities");
   const trigger = document.querySelector("#open-activities");
   const tabs = [...dialog.querySelectorAll(".activity-tab")];
@@ -51,7 +51,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     if (!dialog.open) return;
     if (run && (run.generation !== state.generation || run.area !== state.area)) {
       clearRun();
-      setNotice("La partida ha cambiado en otra pestaña.");
+      setNotice(t("La partida ha cambiado en otra pestaña."));
     }
     const key = activeTab + ":" + state.area + (activeTab === "pets" ? ":" + state.owned.join(",") : "");
     if (key !== boardKey) {
@@ -72,11 +72,11 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
       ? economy.quests.filter((quest) => quest.area === state.area)
       : economy.pets.filter((pet) => state.owned.includes(pet.id));
     const description = quests
-      ? "Completa los encargos de " + economy.areaIndex.get(state.area).name + " y cobra sus recompensas."
-      : "Cada pulsación y cada acierto en un minijuego dan experiencia a tus compañeros. Al evolucionar, duplican su producción.";
+      ? t("Completa los encargos de ") + economy.areaIndex.get(state.area).name + t(" y cobra sus recompensas.")
+      : t("Cada pulsación y cada acierto en un minijuego dan experiencia a tus compañeros. Al evolucionar, duplican su producción.");
     panel.append(node("p", "activity-description", description));
     if (!entries.length) {
-      panel.append(node("p", "activity-empty", "Adopta un compañero en la tienda o gana a Aleta en la pesca."));
+      panel.append(node("p", "activity-empty", t("Adopta un compañero en la tienda o gana a Aleta en la pesca.")));
     }
     const cards = entries.map((entry) => {
       const card = node("article", "activity-card");
@@ -90,17 +90,17 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
       const title = node("h3", "", entry.name);
       const detail = node("p", "", entry.note);
       const progress = node("progress", "activity-meter");
-      progress.setAttribute("aria-label", "Progreso de " + entry.name);
+      progress.setAttribute("aria-label", t("Progreso de ") + entry.name);
       progress.max = quests ? entry.target : economy.evolutionGoal(entry);
       const amount = node("span", "activity-amount");
-      const submit = button(quests ? "Cobrar" : "Evolucionar", async () => {
+      const submit = button(quests ? t("Cobrar") : t("Evolucionar"), async () => {
         if (saving) return;
         saving = true;
         refresh(state);
         try {
           const result = await (quests ? onClaim(entry.id) : onEvolve(entry.id));
           if (result.changed) {
-            setNotice(quests ? "+" + number.format(result.amount) + " chispas por «" + entry.name + "»." : result.message);
+            setNotice(quests ? "+" + number.format(result.amount) + t(" chispas por «") + entry.name + "»." : result.message);
           }
         } finally {
           saving = false;
@@ -120,9 +120,9 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
         const display = number.format(Math.min(value, progress.max)) + " / " + number.format(progress.max);
         progress.value = claimed ? progress.max : Math.min(value, progress.max);
         amount.textContent = quests
-          ? display + "   ·   +" + number.format(entry.reward) + " chispas"
-          : display + " XP   ·   +" + number.format(economy.petRate(state, entry)) + " chispas/s";
-        submit.textContent = claimed ? (quests ? "Cobrado" : "Evolucionado") : (quests ? "Cobrar" : "Evolucionar");
+          ? display + "   ·   +" + number.format(entry.reward) + t(" chispas")
+          : display + " XP   ·   +" + number.format(economy.petRate(state, entry)) + t(" chispas/s");
+        submit.textContent = claimed ? (quests ? t("Cobrado") : t("Evolucionado")) : (quests ? t("Cobrar") : t("Evolucionar"));
         submit.setAttribute("aria-label", submit.textContent + ": " + entry.name);
         submit.disabled = claimed || value < progress.max || saving;
         card.toggleAttribute("data-evolved", !quests && claimed);
@@ -141,17 +141,17 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     stats.append(gameClock, gameScore);
     board = node("div", "activity-stage");
     board.dataset.game = game.kind;
-    playButton = button("Jugar ronda", startGame);
+    playButton = button(t("Jugar ronda"), startGame);
     const footer = node("div", "activity-game-footer");
     footer.append(playButton, stats);
     panel.append(heading, instructions, gameRecord, board, footer);
 
     if (game.kind === "grid") {
       const grid = node("div", "firefly-grid");
-      grid.setAttribute("aria-label", "Casillas del minijuego, teclas 1 a 9");
+      grid.setAttribute("aria-label", t("Casillas del minijuego, teclas 1 a 9"));
       cells = Array.from({ length: 9 }, (_, index) => {
         const cell = button(String(index + 1), () => catchLight(index), "firefly-cell");
-        cell.setAttribute("aria-label", "Casilla " + (index + 1));
+        cell.setAttribute("aria-label", t("Casilla ") + (index + 1));
         grid.append(cell);
         return cell;
       });
@@ -170,7 +170,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
       targetBand = node("span", "forge-target");
       marker = node("span", "forge-marker");
       forgeTrack.append(targetBand, marker);
-      signal = node("p", "activity-signal", "Seis intentos");
+      signal = node("p", "activity-signal", t("Seis intentos"));
       gameButton = button(game.action, hitForge);
       board.append(forgeTrack, signal, gameButton);
     }
@@ -178,8 +178,8 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     drawGame();
     return () => {
       const best = state.records[state.area] || 0;
-      const prize = state.area === "summit" && !state.owned.includes("aleta") ? " Pesca los cuatro peces para conseguir a Aleta." : "";
-      gameRecord.textContent = "Récord: " + best + ". " + number.format(game.reward) + " chispas por acierto." + prize;
+      const prize = state.area === "summit" && !state.owned.includes("aleta") ? t(" Pesca los cuatro peces para conseguir a Aleta.") : "";
+      gameRecord.textContent = t("Récord: ") + best + ". " + number.format(game.reward) + t(" chispas por acierto.") + prize;
       playButton.disabled = Boolean(run) || saving;
     };
   }
@@ -192,7 +192,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
         const lit = run?.target === index;
         if (cell.hasAttribute("data-lit") !== lit) {
           cell.toggleAttribute("data-lit", lit);
-          cell.setAttribute("aria-label", "Casilla " + (index + 1) + (lit ? ", iluminada" : ""));
+          cell.setAttribute("aria-label", t("Casilla ") + (index + 1) + (lit ? t(", iluminada") : ""));
         }
         if (cell.disabled !== !run) cell.disabled = !run;
       });
@@ -205,7 +205,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
         forgeTrack.removeAttribute("data-hit-window");
       }
     }
-    const score = run ? "Aciertos: " + run.score : "";
+    const score = run ? t("Aciertos: ") + run.score : "";
     const clock = run?.ends ? Math.max(0, Math.ceil((run.ends - now) / 1000)) + " s" : "";
     if (gameScore.textContent !== score) gameScore.textContent = score;
     if (gameClock.textContent !== clock) gameClock.textContent = clock;
@@ -254,7 +254,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
   function beginAttempt(now) {
     run.phase = "waiting";
     run.next = now + 850 + Math.random() * 1250;
-    signal.textContent = "Intento " + (run.round + 1) + " de " + run.game.max + ". " + run.game.wait;
+    signal.textContent = t("Intento ") + (run.round + 1) + t(" de ") + run.game.max + ". " + run.game.wait;
   }
 
   function react() {
@@ -262,7 +262,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     const now = performance.now();
     const caught = run.phase === "bite" && now < run.next;
     if (caught) run.score += 1;
-    endAttempt(caught ? run.game.hit : run.phase === "waiting" ? "Demasiado pronto." : run.game.miss, now);
+    endAttempt(caught ? run.game.hit : run.phase === "waiting" ? t("Demasiado pronto.") : run.game.miss, now);
   }
 
   function endAttempt(message, now) {
@@ -276,7 +276,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
   function prepareForge() {
     targetBand.style.setProperty("--target", timingTargets[run.round] * 100 + "%");
     targetBand.style.setProperty("--target-width", run.game.tolerance * 200 + "%");
-    signal.textContent = run.game.step + " " + (run.round + 1) + " de " + run.game.max;
+    signal.textContent = run.game.step + " " + (run.round + 1) + t(" de ") + run.game.max;
   }
 
   function forgePosition(now) {
@@ -291,7 +291,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     const hit = Math.abs(forgePosition(now) - timingTargets[run.round]) <= run.game.tolerance;
     if (hit) run.score += 1;
     run.round += 1;
-    setNotice(hit ? "¡Buen ritmo!" : "El marcador estaba fuera de la zona.");
+    setNotice(hit ? t("¡Buen ritmo!") : t("El marcador estaba fuera de la zona."));
     if (run.round === timingTargets.length) finish();
     else {
       prepareForge();
@@ -344,8 +344,8 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     try {
       const result = await onFinish(area, score, generation);
       if (!result.ignored && dialog.open) {
-        const bonus = result.prize ? " ¡Aleta se une a tus compañeros!" : result.record ? " Nuevo récord." : "";
-        setNotice("Ronda terminada. " + score + " aciertos. +" + number.format(result.amount) + " chispas." + bonus);
+        const bonus = result.prize ? t(" ¡Aleta se une a tus compañeros!") : result.record ? t(" Nuevo récord.") : "";
+        setNotice(t("Ronda terminada. ") + score + t(" aciertos. +") + number.format(result.amount) + t(" chispas.") + bonus);
       }
     } finally {
       saving = false;

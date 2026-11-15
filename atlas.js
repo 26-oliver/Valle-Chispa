@@ -5,7 +5,7 @@ function createValleAtlas({ onOpen, onClose, onVisit }) {
   const trigger = document.querySelector("#open-map");
   const route = dialog.querySelector(".atlas-route");
   const total = dialog.querySelector("#atlas-total");
-  const format = new Intl.NumberFormat("es-ES", { useGrouping: "always" });
+  const format = new Intl.NumberFormat(ValleLocale.locale, { useGrouping: "always" });
 
   const stops = ValleEconomy.areas.map((area, index) => {
     const card = document.createElement("article");
@@ -23,10 +23,10 @@ function createValleAtlas({ onOpen, onClose, onVisit }) {
     name.textContent = area.name;
     const level = document.createElement("p");
     level.className = "atlas-level";
-    level.textContent = "Nivel " + (index + 1);
+    level.textContent = t("Nivel ") + (index + 1);
     const requirement = document.createElement("p");
     requirement.className = "atlas-requirement";
-    requirement.textContent = area.goal ? format.format(area.goal) + " chispas acumuladas" : "Mapa inicial";
+    requirement.textContent = area.goal ? format.format(area.goal) + t(" chispas acumuladas") : t("Mapa inicial");
 
     const visit = document.createElement("button");
     visit.type = "button";
@@ -49,8 +49,8 @@ function createValleAtlas({ onOpen, onClose, onVisit }) {
       const active = area.id === state.area;
       const unlocked = ValleEconomy.isUnlocked(state, area.id);
       const missing = area.goal - state.earned;
-      const remaining = missing === 1 ? "Falta 1 chispa" : "Faltan " + format.format(Math.max(0, missing)) + " chispas";
-      const label = active ? "Aquí estás" : unlocked ? "Viajar" : remaining;
+      const remaining = missing === 1 ? t("Falta 1 chispa") : t("Faltan ") + format.format(Math.max(0, missing)) + t(" chispas");
+      const label = active ? t("Aquí estás") : unlocked ? t("Viajar") : remaining;
       card.dataset.access = active ? "current" : unlocked ? "open" : "locked";
       if (visit.textContent !== label) {
         visit.textContent = label;
