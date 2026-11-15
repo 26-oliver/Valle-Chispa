@@ -213,9 +213,9 @@
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
-  <link rel="stylesheet" href="./shop.css">
-  <link rel="stylesheet" href="./atlas.css">
-  <link rel="stylesheet" href="./activities.css">
+  <link rel="stylesheet" href="./shop.css?v=6">
+  <link rel="stylesheet" href="./atlas.css?v=6">
+  <link rel="stylesheet" href="./activities.css?v=6">
 </head>
 <body>
   <main>
@@ -355,7 +355,7 @@
         </div>
         <form method="dialog"><button type="submit" class="hud-button market-close" aria-label="Cerrar mapas">×</button></form>
       </div>
-      <div class="atlas-body">
+      <div class="atlas-body" tabindex="0" aria-label="Lista de mapas">
         <div class="atlas-route"></div>
       </div>
     </dialog>
@@ -389,8 +389,8 @@
       <p class="reset-status" id="reset-status" role="status"></p>
     </dialog>
   </main>
-  <script src="./economy.js"></script>
-  <script src="./activities.js"></script>
+  <script src="./economy.js?v=6"></script>
+  <script src="./activities.js?v=6"></script>
   <script src="./atlas.js"></script>
   <script src="./shop.js"></script>
   <script>
@@ -457,6 +457,7 @@
       button.type = "button";
       button.className = "companion";
       button.dataset.pet = pet.id;
+      if (pet.roam) button.dataset.roam = pet.roam;
       button.dataset.area = pet.area;
       button.setAttribute("aria-label", pet.name + ", " + pet.note);
       button.title = pet.name + " (+" + pet.rate + " por segundo)";
@@ -539,8 +540,8 @@
         const before = state.earned;
         const passive = economy.settle(state, now);
         const result = change?.(state);
-        const reached = economy.latestArea(state.earned);
-        if (!result?.travel && reached.goal > before) state.pendingArea = reached.id;
+        const unlocked = economy.unlockAreas(state);
+        if (unlocked && !result?.travel) state.pendingArea = unlocked.id;
 
         let arrived = false;
         if (state.pendingArea && !gameScreen.hidden && !overlayOpen()) {
@@ -548,7 +549,7 @@
           arrived = economy.travel(state, area.id).changed;
           if (arrived) pendingArrival = { area, automatic: true };
         }
-        if (initialize || passive || result?.changed || arrived) store();
+        if (initialize || passive || result?.changed || unlocked || arrived) store();
         render();
 
         const crossedGoal = before < goal && state.earned >= goal;

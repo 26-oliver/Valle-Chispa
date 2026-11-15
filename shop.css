@@ -148,7 +148,7 @@
   .companion:hover img { filter: brightness(1.15); }
 }
 .companion:active img { scale: .94; }
-.companion:is([data-pet="broti"], [data-pet="copo"], [data-pet="geodo"]) {
+.companion:is([data-pet="broti"], [data-pet="copo"], [data-pet="geodo"], [data-roam="trail"]) {
   --home-x: 23cqw; --home-y: 72cqh;
   --trail-x: 60cqw; --trail-y: 66cqh;
   --edge-x: 78cqw; --edge-y: 74cqh;
@@ -160,14 +160,14 @@
   --edge-x: 18cqw; --edge-y: 67cqh;
   --route-time: 34s; --outward: -1; --inward: 1;
 }
-.companion:is([data-pet="nimbo"], [data-pet="boreas"], [data-pet="candela"]) {
+.companion:is([data-pet="nimbo"], [data-pet="boreas"], [data-pet="candela"], [data-roam="air"]) {
   --home-x: 18cqw; --home-y: 51cqh;
   --trail-x: 46cqw; --trail-y: 60cqh;
   --edge-x: 83cqw; --edge-y: 49cqh;
   --route-time: 19s; --outward: 1; --inward: -1;
 }
-.companion:is([data-pet="nimbo"], [data-pet="boreas"], [data-pet="candela"]) img { animation: wingbeat 600ms steps(3, end) infinite; }
-.companion:is([data-pet="nimbo"], [data-pet="boreas"], [data-pet="candela"])::before { bottom: 0; opacity: .35; }
+.companion:is([data-pet="nimbo"], [data-pet="boreas"], [data-pet="candela"], [data-roam="air"]) img { animation: wingbeat 600ms steps(3, end) infinite; }
+.companion:is([data-pet="nimbo"], [data-pet="boreas"], [data-pet="candela"], [data-roam="air"])::before { bottom: 0; opacity: .35; }
 .companion[data-pet="ascua"] {
   --home-x: 84cqw; --home-y: 77cqh;
   --trail-x: 69cqw; --trail-y: 74cqh;
@@ -231,7 +231,7 @@
   .market-tab { font-size: 11px; }
 }
 @media (max-height: 500px) {
-  .companion:is([data-pet="broti"], [data-pet="copo"], [data-pet="geodo"]) { --home-y: 65cqh; --trail-y: 60cqh; --edge-y: 65cqh; }
+  .companion:is([data-pet="broti"], [data-pet="copo"], [data-pet="geodo"], [data-roam="trail"]) { --home-y: 65cqh; --trail-y: 60cqh; --edge-y: 65cqh; }
   .companion[data-pet="miga"] { --home-y: 61cqh; --trail-y: 67cqh; --edge-y: 62cqh; }
   .companion[data-pet="ascua"] { --home-y: 70cqh; --trail-y: 66cqh; --edge-y: 72cqh; }
 }
@@ -266,4 +266,22 @@
   .market-effect { grid-template-columns: 52px minmax(0, 1fr); }
   .market-effect .market-controls { grid-column: 1 / -1; }
   .market-effect .market-buy { flex-direction: row; justify-content: space-between; gap: 8px; padding-inline: 8px; }
+}
+
+.companion[data-roam="shore"] {
+  --home-x: 14cqw; --home-y: 76cqh;
+  --trail-x: 40cqw; --trail-y: 78cqh;
+  --edge-x: 70cqw; --edge-y: 70cqh;
+  --route-time: 38s; --outward: 1; --inward: -1;
+}
+.companion[data-roam="high"] {
+  --home-x: 82cqw; --home-y: 40cqh;
+  --trail-x: 68cqw; --trail-y: 47cqh;
+  --edge-x: 21cqw; --edge-y: 39cqh;
+  --route-time: 22s; --outward: -1; --inward: 1;
+}
+.companion[data-roam="high"] img { animation: wingbeat 700ms steps(3, end) infinite; }
+.companion[data-roam="high"]::before { opacity: .2; }
+@media (max-height: 500px) {
+  .companion[data-roam="shore"] { --home-y: 68cqh; --trail-y: 71cqh; --edge-y: 65cqh; }
 }

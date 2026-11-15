@@ -30,9 +30,9 @@
 .activity-notice { min-height: 39px; padding: 8px 24px; background: var(--market-wall); color: var(--mint); font-size: 13px; line-height: 1.45; }
 .activity-notice:not(:empty) { border-top: 1px solid var(--market-line); }
 .activity-stage { display: grid; place-items: center; gap: 12px; min-height: 174px; padding: 12px 16px; border: 1px solid var(--market-line); border-radius: 10px; }
-.activity-stage[data-game="clearing"] { background: var(--firefly-field); }
-.activity-stage[data-game="summit"] { background: var(--ice-field); }
-.activity-stage[data-game="cave"] { background: var(--forge-field); }
+.activity-stage[data-game="grid"] { background: var(--firefly-field); }
+.activity-stage[data-game="reaction"] { background: var(--ice-field); }
+.activity-stage[data-game="timing"] { background: var(--forge-field); }
 .activity-game-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
 .activity-button { min-height: 42px; padding: 4px 12px; border: 1px solid var(--fern); border-radius: 6px; background: var(--mint); color: var(--ink); font-size: 13px; font-weight: 800; }
 .activity-button:enabled:hover { background: var(--mint-hover); }
@@ -51,7 +51,7 @@
 .activity-stage[data-phase="bite"] .activity-signal { color: var(--forge-hot); }
 .activity-signal { color: var(--cream); font-size: 14px; text-align: center; font-weight: 750; }
 .forge-track { position: relative; width: min(460px, 100%); height: 30px; border: 2px solid var(--forge-hot); border-radius: 5px; background: var(--forge-track); }
-.forge-target { position: absolute; inset: 0 auto 0 var(--target, 41%); width: 19%; translate: -50% 0; background: var(--forge-hot); }
+.forge-target { position: absolute; inset: 0 auto 0 var(--target, 41%); width: var(--target-width, 19%); translate: -50% 0; background: var(--forge-hot); }
 .forge-track[data-hit-window] .forge-target { box-shadow: 0 0 14px var(--forge-hot); }
 .forge-marker { position: absolute; inset: -5px auto -5px var(--marker, 0px); width: 7px; translate: -50% 0; border: 2px solid var(--ink); border-radius: 3px; background: var(--cream); }
 .activity-card { display: flex; align-items: center; gap: 12px; min-width: 0; margin-top: 8px; padding: 12px; border: 1px solid var(--market-line); border-radius: 8px; background: var(--market-card); }

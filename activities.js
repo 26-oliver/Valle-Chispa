@@ -8,7 +8,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
   const tabs = [...dialog.querySelectorAll(".activity-tab")];
   const panel = dialog.querySelector(".activity-panel");
   const notice = dialog.querySelector(".activity-notice");
-  const forgeTargets = [.41, .71, .52, .28, .63, .45];
+  const timingTargets = [.41, .71, .52, .28, .63, .45];
   let state;
   let activeTab = "games";
   let boardKey;
@@ -140,15 +140,15 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     const stats = node("div", "activity-score");
     stats.append(gameClock, gameScore);
     board = node("div", "activity-stage");
-    board.dataset.game = state.area;
+    board.dataset.game = game.kind;
     playButton = button("Jugar ronda", startGame);
     const footer = node("div", "activity-game-footer");
     footer.append(playButton, stats);
     panel.append(heading, instructions, gameRecord, board, footer);
 
-    if (state.area === "clearing") {
+    if (game.kind === "grid") {
       const grid = node("div", "firefly-grid");
-      grid.setAttribute("aria-label", "Casillas de luciérnagas, teclas 1 a 9");
+      grid.setAttribute("aria-label", "Casillas del minijuego, teclas 1 a 9");
       cells = Array.from({ length: 9 }, (_, index) => {
         const cell = button(String(index + 1), () => catchLight(index), "firefly-cell");
         cell.setAttribute("aria-label", "Casilla " + (index + 1));
@@ -156,22 +156,22 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
         return cell;
       });
       board.append(grid);
-    } else if (state.area === "summit") {
+    } else if (game.kind === "reaction") {
       const pond = node("div", "ice-pond");
       pond.setAttribute("aria-hidden", "true");
       const bobber = node("span", "ice-bobber");
       pond.append(bobber);
-      signal = node("p", "activity-signal", "Prepara el sedal");
+      signal = node("p", "activity-signal", game.wait);
       signal.setAttribute("role", "status");
-      gameButton = button("Recoger sedal", pullLine);
+      gameButton = button(game.action, react);
       board.append(pond, signal, gameButton);
     } else {
       forgeTrack = node("div", "forge-track");
       targetBand = node("span", "forge-target");
       marker = node("span", "forge-marker");
       forgeTrack.append(targetBand, marker);
-      signal = node("p", "activity-signal", "Seis golpes");
-      gameButton = button("Golpear", hitForge);
+      signal = node("p", "activity-signal", "Seis intentos");
+      gameButton = button(game.action, hitForge);
       board.append(forgeTrack, signal, gameButton);
     }
 
@@ -179,26 +179,26 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     return () => {
       const best = state.records[state.area] || 0;
       const prize = state.area === "summit" && !state.owned.includes("aleta") ? " Pesca los cuatro peces para conseguir a Aleta." : "";
-      gameRecord.textContent = "Récord: " + best + ". " + game.reward + " chispas por acierto." + prize;
+      gameRecord.textContent = "Récord: " + best + ". " + number.format(game.reward) + " chispas por acierto." + prize;
       playButton.disabled = Boolean(run) || saving;
     };
   }
 
   function drawGame(now = performance.now()) {
     if (activeTab !== "games" || !board) return;
-    const area = board.dataset.game;
-    if (area === "clearing") {
+    const kind = board.dataset.game;
+    if (kind === "grid") {
       cells.forEach((cell, index) => {
         const lit = run?.target === index;
         if (cell.hasAttribute("data-lit") !== lit) {
           cell.toggleAttribute("data-lit", lit);
-          cell.setAttribute("aria-label", "Casilla " + (index + 1) + (lit ? ", luciérnaga" : ""));
+          cell.setAttribute("aria-label", "Casilla " + (index + 1) + (lit ? ", iluminada" : ""));
         }
         if (cell.disabled !== !run) cell.disabled = !run;
       });
     } else {
       if (gameButton.disabled !== !run) gameButton.disabled = !run;
-      if (area === "summit") {
+      if (kind === "reaction") {
         const phase = run?.phase || "idle";
         if (board.dataset.phase !== phase) board.dataset.phase = phase;
       } else if (!run) {
@@ -215,21 +215,21 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
     if (run || saving) return;
     const now = performance.now();
     const area = state.area;
-    run = { area, generation: state.generation, score: 0, round: 0, started: now };
+    const game = economy.games[area];
+    run = { area, game, generation: state.generation, score: 0, round: 0, started: now };
+    if (game.duration) run.ends = now + game.duration;
     setNotice("");
-    if (area === "clearing") {
-      run.ends = now + 12000;
+    if (game.kind === "grid") {
       nextLight(now);
-    } else if (area === "summit") {
-      castLine(now);
+    } else if (game.kind === "reaction") {
+      beginAttempt(now);
     } else {
-      run.ends = now + 18000;
       run.lastHit = -Infinity;
       prepareForge();
     }
     refresh(state);
     drawGame(now);
-    if (area === "clearing") cells[0].focus({ preventScroll: true });
+    if (game.kind === "grid") cells[0].focus({ preventScroll: true });
     else gameButton.focus({ preventScroll: true });
     frame = requestAnimationFrame(tick);
   }
@@ -237,35 +237,35 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
   function nextLight(now) {
     const change = 1 + Math.floor(Math.random() * 8);
     run.target = ((run.target ?? -1) + change) % 9;
-    run.next = now + 1150;
+    run.next = now + run.game.interval;
   }
 
   function catchLight(index) {
     const now = performance.now();
-    if (run?.area !== "clearing" || now >= run.ends || index !== run.target) return;
+    if (run?.game.kind !== "grid" || now >= run.ends || index !== run.target) return;
     run.score += 1;
-    if (run.score === economy.games.clearing.max) finish();
+    if (run.score === run.game.max) finish();
     else {
       nextLight(now);
       drawGame(now);
     }
   }
 
-  function castLine(now) {
+  function beginAttempt(now) {
     run.phase = "waiting";
     run.next = now + 850 + Math.random() * 1250;
-    signal.textContent = "Intento " + (run.round + 1) + " de 4 · Espera a que pique";
+    signal.textContent = "Intento " + (run.round + 1) + " de " + run.game.max + ". " + run.game.wait;
   }
 
-  function pullLine() {
-    if (run?.area !== "summit" || run.phase === "pause") return;
+  function react() {
+    if (run?.game.kind !== "reaction" || run.phase === "pause") return;
     const now = performance.now();
     const caught = run.phase === "bite" && now < run.next;
     if (caught) run.score += 1;
-    nextCast(caught ? "¡Pez atrapado!" : run.phase === "waiting" ? "Demasiado pronto." : "El pez ha escapado.", now);
+    endAttempt(caught ? run.game.hit : run.phase === "waiting" ? "Demasiado pronto." : run.game.miss, now);
   }
 
-  function nextCast(message, now) {
+  function endAttempt(message, now) {
     signal.textContent = message;
     run.round += 1;
     run.phase = "pause";
@@ -274,24 +274,25 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
   }
 
   function prepareForge() {
-    targetBand.style.setProperty("--target", forgeTargets[run.round] * 100 + "%");
-    signal.textContent = "Golpe " + (run.round + 1) + " de 6";
+    targetBand.style.setProperty("--target", timingTargets[run.round] * 100 + "%");
+    targetBand.style.setProperty("--target-width", run.game.tolerance * 200 + "%");
+    signal.textContent = run.game.step + " " + (run.round + 1) + " de " + run.game.max;
   }
 
   function forgePosition(now) {
-    const fraction = ((now - run.started) / 1300) % 2;
+    const fraction = ((now - run.started) / run.game.speed) % 2;
     return fraction <= 1 ? fraction : 2 - fraction;
   }
 
   function hitForge() {
     const now = performance.now();
-    if (run?.area !== "cave" || now >= run.ends || now - run.lastHit < 260) return;
+    if (run?.game.kind !== "timing" || now >= run.ends || now - run.lastHit < 260) return;
     run.lastHit = now;
-    const hit = Math.abs(forgePosition(now) - forgeTargets[run.round]) <= .095;
+    const hit = Math.abs(forgePosition(now) - timingTargets[run.round]) <= run.game.tolerance;
     if (hit) run.score += 1;
     run.round += 1;
-    setNotice(hit ? "¡Golpe preciso!" : "El golpe cayó fuera de la zona.");
-    if (run.round === forgeTargets.length) finish();
+    setNotice(hit ? "¡Buen ritmo!" : "El marcador estaba fuera de la zona.");
+    if (run.round === timingTargets.length) finish();
     else {
       prepareForge();
       drawGame(now);
@@ -304,25 +305,25 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
       finish();
       return;
     }
-    if (run.area === "clearing" && now >= run.next) nextLight(now);
-    if (run.area === "summit" && now >= run.next) {
+    if (run.game.kind === "grid" && now >= run.next) nextLight(now);
+    if (run.game.kind === "reaction" && now >= run.next) {
       if (run.phase === "waiting") {
         run.phase = "bite";
-        run.next = now + 1050;
-        signal.textContent = "¡Ahora! Recoge el sedal";
+        run.next = now + run.game.window;
+        signal.textContent = run.game.ready;
       } else if (run.phase === "bite") {
-        nextCast("El pez ha escapado.", now);
-      } else if (run.round >= 4) {
+        endAttempt(run.game.miss, now);
+      } else if (run.round >= run.game.max) {
         finish();
         return;
       } else {
-        castLine(now);
+        beginAttempt(now);
       }
     }
-    if (run.area === "cave") {
+    if (run.game.kind === "timing") {
       const position = forgePosition(now);
       marker.style.setProperty("--marker", position * 100 + "%");
-      forgeTrack.toggleAttribute("data-hit-window", Math.abs(position - forgeTargets[run.round]) <= .095);
+      forgeTrack.toggleAttribute("data-hit-window", Math.abs(position - timingTargets[run.round]) <= run.game.tolerance);
     }
     drawGame(now);
     frame = requestAnimationFrame(tick);
@@ -362,7 +363,7 @@ function createValleActivities({ onOpen, onClose, onFinish, onClaim, onEvolve })
   }
 
   dialog.addEventListener("keydown", (event) => {
-    if (run?.area !== "clearing" || !/^[1-9]$/.test(event.key) || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (run?.game.kind !== "grid" || !/^[1-9]$/.test(event.key) || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
     event.preventDefault();
     catchLight(Number(event.key) - 1);
   });

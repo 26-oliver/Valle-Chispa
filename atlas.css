@@ -9,6 +9,18 @@
   --magma-light: #ffa05d99;
   --ember-particle: #ff9355;
   --ember-light: #ffe099;
+  --lunar-glass: #211d45ed;
+  --lunar-edge: #d4b2f986;
+  --lunar-light: #eeb6ff;
+  --lunar-glow: #d4a7ff8f;
+  --sky-glass: #1c4240ed;
+  --sky-edge: #fff1a585;
+  --sky-light: #a9ffe3;
+  --sky-glow: #9fffd999;
+  --astral-glass: #1a2047f2;
+  --astral-edge: #eed39b80;
+  --astral-light: #f8cf8d;
+  --astral-glow: #e2c1ff9c;
 }
 
 .game-screen[data-area="summit"] { --glass: var(--winter-glass); --glass-edge: var(--winter-edge); }
@@ -31,10 +43,11 @@
 .map-trigger .map-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
 .map-trigger .map-action { border-left: 1px solid var(--glass-edge); padding-left: 8px; color: var(--mint); font-size: 11px; }
 
-.atlas { height: min(422px, calc(100dvh - 48px)); }
+.atlas { height: min(664px, calc(100dvh - 48px)); }
 .atlas-header { grid-template-columns: minmax(0, 1fr) auto; }
 .atlas-intro { margin-top: 4px; color: var(--cream-muted); font-size: 13px; line-height: 1.45; }
 .atlas-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px 24px; }
+.atlas-body:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 .atlas-route { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .atlas-stop { min-width: 0; border: 1px solid var(--market-line); border-radius: 9px; background: var(--market-card); overflow: clip; }
 .atlas-stop[data-access="current"] { border-color: var(--fern); }
@@ -88,7 +101,7 @@
 @media (max-width: 620px) {
   .game-screen .location { bottom: max(12px, env(safe-area-inset-bottom)); }
   .game-screen .collect-area { bottom: max(64px, calc(var(--bottom) + 24px)); }
-  .atlas { height: min(456px, calc(100dvh - 24px)); }
+  .atlas { height: min(668px, calc(100dvh - 24px)); }
   .atlas-header { padding: 12px; }
   .atlas-body { padding: 12px; }
   .atlas-route { grid-template-columns: minmax(0, 1fr); gap: 8px; }
@@ -102,3 +115,67 @@
   .game-screen .location { inset: auto auto 8px 8px; }
   .game-screen .collect-area { bottom: 54px; }
 }
+
+.game-screen[data-area="forest"] { --glass: var(--lunar-glass); --glass-edge: var(--lunar-edge); }
+.game-screen[data-area="isles"] { --glass: var(--sky-glass); --glass-edge: var(--sky-edge); }
+.game-screen[data-area="astral"] { --glass: var(--astral-glass); --glass-edge: var(--astral-edge); }
+.game-screen[data-area="forest"] .mote { background: var(--lunar-light); box-shadow: 0 0 10px var(--lunar-light); }
+.game-screen[data-area="isles"] .mote { background: var(--sky-light); box-shadow: 0 0 10px var(--sky-light); }
+.game-screen[data-area="astral"] .mote { background: var(--astral-light); box-shadow: 0 0 10px var(--astral-light); }
+.game-screen[data-gem="moonstone"] { --glow: var(--lunar-glow); }
+.game-screen[data-gem="skyglass"] { --glow: var(--sky-glow); }
+.game-screen[data-gem="starcore"] { --glow: var(--astral-glow); }
+
+.market[data-area="forest"] {
+  --market: #211c37;
+  --market-wall: #19152b;
+  --market-card: #302649;
+  --market-line: #5d4976;
+  --market-art: #39295c;
+  --mint: #ebcbff;
+  --mint-hover: #f6e4ff;
+  --fern: #b68ad3;
+  --firefly-field: #262046;
+  --firefly-ready: #e8bcfb;
+}
+.market[data-area="isles"] {
+  --market: #18352e;
+  --market-wall: #102720;
+  --market-card: #22473e;
+  --market-line: #4a7264;
+  --market-art: #2d5a4e;
+  --mint: #c4f9d8;
+  --mint-hover: #e1ffe9;
+  --fern: #8fc5aa;
+  --forge-field: #264f49;
+  --forge-hot: #bdf4d9;
+  --forge-track: #3b6c60;
+}
+.market[data-area="astral"] {
+  --market: #20233e;
+  --market-wall: #16182f;
+  --market-card: #2d3454;
+  --market-line: #525b81;
+  --market-art: #333d6a;
+  --mint: #ffdea8;
+  --mint-hover: #fff0d0;
+  --fern: #ba9c71;
+  --ice-field: #302c53;
+  --ice-edge: #c1a2eb;
+  --ice-float: #b88cdc;
+}
+.market[data-area="astral"] .ice-pond { background: var(--astral-glass); }
+[data-effect="petals"] .particle, [data-effect="petals"] .effect-mark, [data-art="petals"] .effect-preview {
+  background: var(--lunar-light);
+  clip-path: polygon(8% 8%, 50% 0, 91% 23%, 100% 61%, 76% 90%, 37% 100%, 9% 77%, 0 40%);
+}
+[data-effect="petals"] .particle:nth-child(even) { background: var(--mint); }
+[data-effect="zephyr"] .particle, [data-effect="zephyr"] .effect-mark, [data-art="zephyr"] .effect-preview {
+  background: var(--sky-light);
+  clip-path: polygon(5% 73%, 38% 47%, 68% 46%, 96% 11%, 100% 30%, 72% 67%, 39% 70%, 0 96%);
+}
+[data-effect="stardust"] .particle, [data-effect="stardust"] .effect-mark, [data-art="stardust"] .effect-preview {
+  background: var(--astral-light);
+  clip-path: polygon(50% 0, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0 50%, 35% 35%);
+}
+[data-effect="stardust"] .particle:nth-child(even) { background: var(--effect-star); }
